@@ -1,0 +1,4 @@
+name: sitdown
+version: '${version}'
+main: space.yurisi.sitdown.Sitdown
+api-version: '1.20'
