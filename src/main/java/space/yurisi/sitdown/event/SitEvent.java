@@ -2,6 +2,7 @@ package space.yurisi.sitdown.event;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -27,9 +28,15 @@ public class SitEvent implements Listener {
                     player.getVehicle().remove();
                     return;
                 }
-                Item item = sitdown(block, player);
-                item.setItemStack(new ItemStack(Material.BIRCH_BUTTON));
-                item.setPassenger(player);
+                Entity arrow = sitdown(block, player);
+                arrow.addPassenger(player);
+            }
+        }
+        if(event.getPlayer().isInsideVehicle() && event.getPlayer().isSneaking()) {
+            event.getPlayer().sendMessage("event called");
+            Entity vehicle = event.getPlayer().getVehicle();
+            if(vehicle != null && vehicle instanceof Item) {
+                vehicle.remove();
             }
         }
     }
@@ -42,12 +49,13 @@ public class SitEvent implements Listener {
         }
     }
 
-    private Item sitdown(Block block, Player player) {
-        Location location = block.getLocation().add(0.5, 0.2, 0.5);
-        Item item = location.getWorld().dropItemNaturally(location, new ItemStack(Material.BIRCH_BUTTON));
-        item.setPickupDelay(Integer.MAX_VALUE);
-        item.teleport(location);
-        item.setVelocity(new Vector(0, 0, 0));
-        return item;
+    private Entity sitdown(Block block, Player player) {
+        Location location = block.getLocation();
+        Arrow arrow = location.getWorld().spawnArrow(location, new Vector(0, 1, 0), 0, 0);
+        arrow.setGravity(false);
+        arrow.setSilent(true);
+        arrow.setInvulnerable(true);
+        arrow.setPickupStatus(Arrow.PickupStatus.DISALLOWED);
+        return arrow;
     }
 }
