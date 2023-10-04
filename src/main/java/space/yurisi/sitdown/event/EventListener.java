@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import space.yurisi.sitdown.Sitdown;
 
 public class EventListener implements Listener {
@@ -25,9 +26,16 @@ public class EventListener implements Listener {
         if (event.hasBlock() && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
+        if(event.hasItem()){
+            return;
+        }
 
         Block block = event.getClickedBlock();
         Player player = event.getPlayer();
+
+        if(player.isSneaking()) {
+            return;
+        }
 
         if (!block.getType().toString().contains("STAIRS")) {
             return;
