@@ -23,6 +23,9 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
+        Block block = event.getClickedBlock();
+        if(block == null) return;
+
         if (event.hasBlock() && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -30,7 +33,6 @@ public class EventListener implements Listener {
             return;
         }
 
-        Block block = event.getClickedBlock();
         Player player = event.getPlayer();
 
         if(player.isSneaking()) {
