@@ -1,6 +1,10 @@
 package space.yurisi.sitdown.event;
 
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Stairs;
 import org.bukkit.entity.*;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -26,9 +30,18 @@ public class EventListener implements Listener {
         Block block = event.getClickedBlock();
         if(block == null) return;
 
+        BlockData data = block.getBlockData();
+        if(data instanceof Stairs){
+            Stairs stairs = (Stairs) block.getBlockData();
+            if(stairs.getHalf() == Bisected.Half.TOP){
+                return;
+            }
+        }
+
         if (event.hasBlock() && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
+
         if(event.hasItem()){
             return;
         }
@@ -40,6 +53,9 @@ public class EventListener implements Listener {
         }
 
         if (!block.getType().toString().contains("STAIRS")) {
+            return;
+        }
+        if (block.getRelative(BlockFace.UP).getType().isSolid()) {
             return;
         }
 
@@ -56,7 +72,14 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onVehicle(PlayerToggleSneakEvent event) {
-        exitVehicle(event.getPlayer());
+        Player player = event.getPlayer();
+        Location location = player.getLocation().clone();
+        location.add(0, 0.7, 0);
+        if(!main.existsVehicle(player)){
+            return;
+        }
+        exitVehicle(player);
+        player.teleport(location);
     }
 
     @EventHandler
@@ -70,14 +93,54 @@ public class EventListener implements Listener {
     }
 
     private void sitDown(Block block, Player player) {
-        Location location = block.getLocation();
-        location.add(0.5, -1.1, 0.5);
+        Location location = block.getLocation().clone();
+        location.add(0.5, 0.3, 0.5);
+        Stairs stairs = (Stairs) block.getBlockData();
+        BlockFace blockface = stairs.getFacing();
+        float yaw = 0;
+        switch (blockface) {
+            case NORTH:
+                yaw = 0;
+                break;
+            case EAST:
+                yaw = 90;
+                break;
+            case SOUTH:
+                yaw = 180;
+                break;
+            case WEST:
+                yaw = 270;
+                break;
+        }
+        Stairs.Shape shape = stairs.getShape();
+        switch (shape) {
+            case INNER_LEFT:
+                yaw -= 45;
+                break;
+            case INNER_RIGHT:
+                yaw += 45;
+                break;
+            case OUTER_LEFT:
+                yaw -= 45;
+                break;
+            case OUTER_RIGHT:
+                yaw += 45;
+                break;
+            case STRAIGHT:
+                yaw += 0;
+               break;
+
+        }
 
         ArmorStand armorStand = location.getWorld().spawn(location, ArmorStand.class);
         armorStand.setInvisible(true);
         armorStand.setGravity(false);
         armorStand.setSilent(true);
         armorStand.setInvulnerable(true);
+        armorStand.setMarker(true);
+        armorStand.setRotation(yaw, 0);
+
+        player.setRotation(yaw, 0);
         armorStand.addPassenger(player);
 
         main.setVehicle(player, armorStand);
