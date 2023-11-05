@@ -94,7 +94,7 @@ public class EventListener implements Listener {
 
     private void sitDown(Block block, Player player) {
         Location location = block.getLocation().clone();
-        location.add(0.5, 0.3, 0.5);
+        location.add(0.5, 0.4, 0.5);
         Stairs stairs = (Stairs) block.getBlockData();
         BlockFace blockface = stairs.getFacing();
         float yaw = 0;
